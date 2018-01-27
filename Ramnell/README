@@ -1,0 +1,26 @@
+#Ramnell n-dimensional Physics engine
+
+To update Newton, I began working with a friend to create an extremely
+flexible physics engine. To that end, Ramnell requires as little basis
+on the real world as possible, featuring:
+- n-dimensional physics: Everything is defined in terms of vectors, so 
+   you can do kinematics in five dimensions if you want
+- user-defined forces: Any function can be used as a force, provided 
+   that it returns a vector
+- multiple systems in parallel: add objects to systems, can run multiple
+   simulations at once
+
+The system is extremly powerful and capable of modeling literally any
+particle based system, provided you can generate the function to describe
+the forces.
+
+Examples:
+- multiple projectiles acting under drag forces in three dimensions
+- n-body orbital simulations
+- spring equilibrium problems
+
+Further development:
+- collision detection is primitive, currently only functioning for spheres and planes
+- plotting currently requires writing to a file and graphing externally, a dedicated
+   visual interface is being developed
+- conservation of momentum with collisions is not yet integrated
