@@ -1,4 +1,4 @@
-#Ramnell n-dimensional Physics engine
+ # Ramnell n-dimensional Physics engine
 
 To update Newton, I began working with a friend to create an extremely
 flexible physics engine. To that end, Ramnell requires as little basis
