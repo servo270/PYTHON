@@ -2,8 +2,13 @@
 #uses a riemann sum approxamation to calculate kinematics
 #under forces of weight, springs, friction, and drag
 
+#the system being modeled is an egg drop using a parachute to slow down initially
+#with some legs absorbing the impact
+#coefficient of drag was determined experimentally
+
 from math import sin, cos, radians, pi
 
+'''initial condition'''
 massOne = .168
 timeStep = .001
 step = 0
@@ -18,8 +23,8 @@ airDens = 1.3
 constants = (massOne,timeStep,fricCoeff,angle,sprConst, area, dragCoeff, airDens)
 
 #initial values
-posOne = 10.4 #11.4 #4.01 #11.4
-velOne = -.01
+posOne = 11.4
+velOne = -.01 #slight negative to prevent early termination of loop
 maxA = 0
 
 variables = [velOne,posOne,0,posOne - sprPos,maxA]
@@ -49,7 +54,6 @@ def getVelocity(constants,variables):
     variables[0] += variables[2]*timeStep               #v = vi + at
     return variables
 
-
 def getPosition(constants,variables):
     variables[1] += variables[0]*timeStep              #x = xi + vt
     variables[3] = variables[1] - sprPos               #recaclulate the distance to the spring
@@ -63,5 +67,6 @@ while variables[0] < 0 and variables[1] > 0:
     variables = getPosition(constants,variables)
     step += 1
 
+#print the end condition
 print(step*timeStep, ' Seconds')
 print(variables[0:2],variables[4])
