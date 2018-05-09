@@ -1,8 +1,8 @@
 #Ramnell
 
 def sumVectors(vectorList):
-    vec = Vector([0,0,0])
-    for i in vectorList:
+    vec = vectorList[0]
+    for i in vectorList[1:]:
         vec += i
     return vec
 
@@ -86,19 +86,19 @@ class Vector():
 
     def __mul__(self,scalar):
         return Vector([self.body[i] * scalar for i in range(0,len(self))])
+    
+    def __rmul__(self,scalar):
+        return Vector([self.body[i] * scalar for i in range(0,len(self))])
 
     def mag(self):
         return sum([v ** 2 for v in self.body]) ** .5
 
-    def show(self, prnt = 1):
-        if prnt == 1: print(self.body)
-        return self.body
 
     def __len__(self):
         return len(self.body)
 
     def __repr__(self):
-        return str(repr(self.body))
+        return "<" + ','.join([float(n) for n in self.body]) + ">"
 
     def unit(self):
         return self * (1/self.mag())
