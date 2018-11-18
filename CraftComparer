@@ -1,0 +1,92 @@
+'''
+KSP part mapper and comparison program
+Maps parts in KSP .craft files and finds overlaps between craft for moderation purposes
+Written by Servo, Nov. 2018
+
+Version 1.0
+'''
+import os
+import random
+
+TRIALS = 100 #number of tests
+SENSITIVITY = 1 #relatively how small the search window is
+
+def printCraft(craft):
+    [print("(%3d): %s" % (x+1, craft[x].strip(".craft"))) for x in range(len(craft))]
+    #print each craft with its corresponding number
+
+def compareCraft(closerLook,trials = TRIALS,sens = SENSITIVITY,output=True):
+    files = [open(x,'r') for x in closerLook] 
+    craftOne = files[0].readlines()
+    craftTwo = files[1].readlines()
+    [x.close() for x in files]
+    #open the files, then copy their contents into two lists before closing them
+    
+    craftOne = cleanCraft(craftOne)
+    craftTwo = cleanCraft(craftTwo)
+    #clean the files into long strings that are useful for looking through
+
+    hits = 0
+    for x in range(0,trials): #for each trial
+        window = int(random.randint(20,100) * sens) #generate a random window size
+        a = random.randint(0,len(craftOne) - window) 
+        rTest = craftOne[a:a+window] #determine where in the long craft string we're looking with that window
+        
+        hits += (rTest in craftTwo) #if that segment is in the second craft string, register a hit
+        
+    if output:
+        print("hits: %d\ntrials: %d\n%s%4.2f similarity" % (hits, trials,'%', hits/trials * 100))
+    return hits, trials
+    
+def cleanCraft(craft):
+    cleanedCraft = craft[0:10] #grab the header, start the new list with it
+
+    for index in range(len(craft)):
+        if craft[index] == "PART\n": #look for each separate part
+            cleanedCraft += [craft[index + 2:index+14]] #grab the following 12 lines. This is where the location and rotation data are
+    cleanedCraftString = ''.join([''.join(x) for x in cleanedCraft]) #mash everything into one big string
+    return cleanedCraftString
+            
+
+#scan the directory for relevant files
+print(os.getcwd())
+tree = list(os.walk('.'))[0][2]
+craft = list(filter(lambda x: '.craft' in x, tree))
+
+inp = input('.\n').lower()
+while inp != 'x': #break with X
+    if inp and inp[0] == 'h':
+        print("[S]how: show craft ID numbers\n[#1 #2]: compare craft #s 1 and 2\n[A]ll: compare ALL craft in current folder. WARNING: this takes a while for large folders")
+
+    if inp and inp[0] == 's': #show all craft numbers
+        printCraft(craft)
+
+                    #check two specific craft using numeric IDs
+    if inp and all([x.isnumeric() for x in inp.split()]) and len(inp.split()) == 2: 
+        closerLookNums = [int(x)-1 for x in inp.split()]
+        if all([x <= len(craft) and x >= 0 for x in closerLookNums]): #ensure that two unique, valid numbers are inputted
+            if closerLookNums[0] == closerLookNums[1]:
+                print("same craft!")
+                inp = ' ' #error handling line here. Forces inp to reset so the continue doesn't screw things up
+                continue
+            closerLook = [craft[x] for x in closerLookNums]
+            printCraft(closerLook) 
+            compareCraft(closerLook) #compare the two indicated craft
+        else:
+            print("out of range!")
+    
+    if inp and inp[0] == 'a': #check all craft in the current directory
+        for x in range(0,len(craft)):
+            for y in range(x,len(craft)):
+                if x != y: #scan every unique combination of craft files
+                    hits,trials = compareCraft([craft[x],craft[y]],output = False)
+                    if hits/trials > .25: #if the percentage is high enough, indicate as much
+                        print("potential copy between %s and %s. \nsimilarity: %s%4.2f\n"
+                              % (craft[x][0:-6],craft[y][0:-6],'%',hits/trials*100))
+                    
+
+
+    inp = input('.\n').lower()
+
+
+    
