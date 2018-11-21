@@ -2,10 +2,12 @@
 KSP part mapper and comparison program
 Written by Servo, Nov. 2018
 
+Version 1.2
+> added reverse search on craft comparison
+
 Version 1.1
-> removed odd coding practics (generator loops)
+> removed odd coding practics - generator loops
 > added ability to update trials and sensitivity on the fly
-> improved initial info
 '''
 version = 1.1
 import os
@@ -31,17 +33,24 @@ def compareCraft(closerLook,trials = TRIALS,sens = SENSITIVITY,output=True):
     craftTwo = cleanCraft(craftTwo)
     #clean the files into long strings that are useful for looking through
 
-    hits = 0
+    hitsAB = 0
     for x in range(0,trials): #for each trial
         window = int(random.randint(20,100) * sens) #generate a random window size
         a = random.randint(0,len(craftOne) - window) 
         rTest = craftOne[a:a+window] #determine where in the long craft string we're looking with that window
         
-        hits += (rTest in craftTwo) #if that segment is in the second craft string, register a hit
+        hitsAB += (rTest in craftTwo) #if that segment is in the second craft string, register a hit
+    hitsBA = 0
+    for x in range(0,trials): #for each trial
+        window = int(random.randint(20,100) * sens) #generate a random window size
+        a = random.randint(0,len(craftTwo) - window) 
+        rTest = craftTwo[a:a+window] #determine where in the long craft string we're looking with that window
         
+        hitsBA += (rTest in craftOne) #if that segment is in the second craft string, register a hit
     if output:
-        print("hits: %d\ntrials: %d\n%s%4.2f similarity" % (hits, trials,'%', hits/trials * 100))
-    return hits, trials
+        print("A-B hits: %d\ntrials: %d\n%s%4.2f similarity" % (hitsAB, trials,'%', hitsAB/trials * 100))
+        print("B-A hits: %d\ntrials: %d\n%s%4.2f similarity" % (hitsBA, trials,'%', hitsBA/trials * 100))
+    return hitsAB, hitsBA
     
 def cleanCraft(craft):
     cleanedCraft = craft[0:10] #grab the header, start the new list with it
@@ -66,6 +75,7 @@ while inp != 'x': #break with X
         print("[S]how: show craft ID numbers\n[#1 #2]: compare craft #s 1 and 2")
         print("[A]ll: compare ALL craft in current folder. WARNING: this takes a while")
         print("[U]pdate: change sensitivity values and trial size")
+        print("e[X]it: end the program")
         
     if inp and inp[0] == 's': #show all craft numbers. First line is error handling against empty strings
         printCraft(craft)
@@ -88,10 +98,10 @@ while inp != 'x': #break with X
         for x in range(0,len(craft)):
             for y in range(x,len(craft)):
                 if x != y: #scan every unique combination of craft files
-                    hits,trials = compareCraft([craft[x],craft[y]],output = False,trials = TRIALS,sens = SENSITIVITY)
-                    if hits/trials > MINHITPERC: #if the percentage is high enough, indicate as much
+                    hitsAB,hitsBA = compareCraft([craft[x],craft[y]],output = False,trials = TRIALS,sens = SENSITIVITY)
+                    if hitsAB/TRIALS > MINHITPERC or hitsBA/TRIALS > MINHITPERC: #if the percentage is high enough, indicate as much
                         print("potential copy between %s and %s. \nsimilarity: %s%4.2f\n"
-                              % (craft[x][0:-6],craft[y][0:-6],'%',hits/trials*100))
+                              % (craft[x][0:-6],craft[y][0:-6],'%',max([hitsAB,hitsBA])/TRIALS*100))
                         
     if inp and inp[0] == 'u':
          print("update values using 'letter new_value' form")
